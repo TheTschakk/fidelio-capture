@@ -38,7 +38,7 @@ int squareDist(int i1, int i2) {
     return (getX(i1)-getX(i2)) * (getX(i1)-getX(i2)) + (getY(i1)-getY(i2)) * (getY(i1)-getY(i2));
 }
 
-void getPosition(struct graph *met) {
+void getPosition(struct meteor *met) {
     int i;
     float meanX=0, meanY=0;
     float meanX2=0, meanY2=0;

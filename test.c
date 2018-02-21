@@ -30,45 +30,7 @@ void print2dArray(int **arr, int rows, int cols);
 
 #include "met.h"
 #include "analysis.h"
-
-// write video file to frm-buffer
-int loadFile(void) {
-	FILE *fp;
-	int i;
-
-	fp = fopen(input, "rb");
-	
-	// write each frame of input to data array of cyclical buffer, one at a time ("buffer_size" times)
-	for (i = 0; i < buffer_size; i++) {
-		fread(frm->data, LENGTH, 1, fp); // write to current frame
-		frm = frm->next; // jump to next frame in "frm"
-	}
-
-	fclose(fp); // close input
-	return 0;
-}
-
-// write video to file 
-int writeVideo(struct image *last, int nfrms) {
-	int i;
-	FILE *outfd = fopen("positiv.bwv", "a"); // open file in append mode
-	printf("%i \n", nfrms);
-
-	// go back nfrms frames from last frame to first frame
-	for (i=0; i<nfrms; i++) {
-	    last = last->prev;
-	}
-
-	// append frames to file
-	for (i=0; i<nfrms; i++) {
-		fwrite(last->data, LENGTH, 1, outfd); // append current frame
-		last = last->next; // jump to next frame
-		printf("%i \n", i);
-	}
-
-	fclose(outfd); // close file
-	return 0;
-}
+#include "io.h"
 
 // main loop works similar to actual 
 int mainloop(void) {
@@ -82,17 +44,15 @@ int mainloop(void) {
 		if ( endOfMeteor(frm, &lifetime, 3) != -1 )
 		    found = lifetime;
 
-		printf("found %i\n", found);
 		if (found > 0)
 		    n++;
 		else
 		    n = 0;
 
 		if (n > upfluff) {
-		    writeVideo(frm, (downfluff + found + upfluff));
+		    write_video(frm, (downfluff + found + upfluff));
 		    n = 0;
 		    found = 0;
-		    return 1;
 		}
 
 		printf("frame %i ################################################\n", frm->index);
@@ -113,7 +73,7 @@ int mainloop(void) {
 int main(int argc,char* argv[]){
     input = argv[1];
 	frm = buildBuffer(buffer_size); // generate cyclicalc buffer of size "buffer_size" frames
-	loadFile(); // invoke the load_file() function in order to fill generated buffer with frames from "input"
+	read_video(input); // invoke the load_file() function in order to fill generated buffer with frames from "input"
 
 	mainloop(); // start the main loop
 	

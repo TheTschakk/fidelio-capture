@@ -13,12 +13,12 @@ struct image {
     int *shdw;
     int **adj;
     int num;
-    struct graph **met;
+    struct meteor **met;
     struct image *prev;
     struct image *next;
 };
 
-struct graph {
+struct meteor {
     int Nlght;
     int Nshdw;
     int Nvtc;
@@ -35,8 +35,8 @@ struct graph {
     float dir;
     int continuity;
     int duration;
-    struct graph *prev;
-    struct graph *next;
+    struct meteor *prev;
+    struct meteor *next;
 };
 
 struct image *buildBuffer(int size){
@@ -75,7 +75,7 @@ struct image *buildBuffer(int size){
 	return start;
 }
 
-void initGraph(struct graph *met) {
+void initMeteor(struct meteor *met) {
     free(met->lght);
     free(met->shdw);
     free(met->vtc);
@@ -94,7 +94,7 @@ void freeBuffer(struct image *img) {
 	if (img->adj != NULL) img->adj = free2dArray(img->adj, img->Nlght);
 
 	for (i=0; i<(img->num); i++) {
-	    initGraph(img->met[i]);
+	    initMeteor(img->met[i]);
 	    free(img->met[i]);
 	}
 
@@ -109,8 +109,8 @@ void freeBuffer(struct image *img) {
 
 void addMeteor(struct image *img) {
     int N = img->num;
-    img->met = realloc(img->met, (N+1) * sizeof(struct graph *));
-    img->met[N] = malloc(sizeof(struct graph));
+    img->met = realloc(img->met, (N+1) * sizeof(struct meteor *));
+    img->met[N] = malloc(sizeof(struct meteor));
     img->met[N]->lght = malloc(sizeof(int));
     img->met[N]->shdw = malloc(sizeof(int));
     img->met[N]->vtc = NULL;
@@ -132,7 +132,7 @@ void initFrame(struct image *img) {
     img->shdw = NULL;
 
     for (i=0; i<(img->num); i++) {
-	initGraph(img->met[i]);
+	initMeteor(img->met[i]);
     }
 
     free(img->met);
@@ -143,7 +143,7 @@ void initFrame(struct image *img) {
     img->num = 0;
 }
 
-void assignContinuity(struct image *img, struct graph *met, int dist, int depth) {
+void assignContinuity(struct image *img, struct meteor *met, int dist, int depth) {
     int deg, j;
 
     met->continuity = 0;
@@ -166,7 +166,7 @@ void assignContinuity(struct image *img, struct graph *met, int dist, int depth)
     }
 }
 
-void getVelocity(struct graph *met0) {
+void getVelocity(struct meteor *met0) {
     float vx, vy;
     float Rx, Ry;
 
@@ -177,7 +177,7 @@ void getVelocity(struct graph *met0) {
 
     int n=0, t=0;
 
-    struct graph *met = met0;
+    struct meteor *met = met0;
 
     while (met->prev != NULL) {
 	tsum += t;
@@ -231,9 +231,9 @@ int endOfMeteor(struct image *img, int *dur, int depth) {
     return num;
 }
     
-int backTraceMeteor(struct graph *met0) {
+int backTraceMeteor(struct meteor *met0) {
     int i=0;
-    struct graph *met;
+    struct meteor *met;
     met = met0;
 
     printf("input\t\tX\t\tY\t\txyVar\t\tvelo2\t\tdir\t\tDensity\t\tmDegree\tmWeight\tnum\tduration \n");
