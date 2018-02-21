@@ -10,7 +10,8 @@
 
 static char *input;
 const int buffer_size = 150;
-const int n_elapsed = 50;
+static int upfluff = 25;
+static int downfluff = 25;
 
 static struct image *frm = NULL;
 
@@ -31,7 +32,7 @@ void print2dArray(int **arr, int rows, int cols);
 #include "analysis.h"
 
 // write video file to frm-buffer
-int load_file(void) {
+int loadFile(void) {
 	FILE *fp;
 	int i;
 
@@ -48,14 +49,21 @@ int load_file(void) {
 }
 
 // write video to file 
-int write_video(void) {
+int writeVideo(struct image *last, int nfrms) {
 	int i;
 	FILE *outfd = fopen("positiv.bwv", "a"); // open file in append mode
+	printf("%i \n", nfrms);
+
+	// go back nfrms frames from last frame to first frame
+	for (i=0; i<nfrms; i++) {
+	    last = last->prev;
+	}
 
 	// append frames to file
-	for (i = 0; i < buffer_size; i++) {
-		fwrite(frm->data, LENGTH, 1, outfd); // append current frame
-		frm = frm->next; // jump to next frame
+	for (i=0; i<nfrms; i++) {
+		fwrite(last->data, LENGTH, 1, outfd); // append current frame
+		last = last->next; // jump to next frame
+		printf("%i \n", i);
 	}
 
 	fclose(outfd); // close file
@@ -64,22 +72,38 @@ int write_video(void) {
 
 // main loop works similar to actual 
 int mainloop(void) {
-	int n = 0;
+	int n=0;
+	int found=0;
+	int lifetime;
+
 	while (1) {
 		analyseFrame(frm);
+
+		if ( endOfMeteor(frm, &lifetime, 3) != -1 )
+		    found = lifetime;
+
+		printf("found %i\n", found);
+		if (found > 0)
+		    n++;
+		else
+		    n = 0;
+
+		if (n > upfluff) {
+		    writeVideo(frm, (downfluff + found + upfluff));
+		    n = 0;
+		    found = 0;
+		    return 1;
+		}
 
 		printf("frame %i ################################################\n", frm->index);
 		printImage(frm);
 
-		if (!(n < n_elapsed)) {
-			write_video();
-			break;
-		}
-
 		frm = frm->next;
 
+		/*
 		if (frm->index == 150)
 		    return 1;
+		*/
 
 	}
 	return 0;
@@ -89,7 +113,7 @@ int mainloop(void) {
 int main(int argc,char* argv[]){
     input = argv[1];
 	frm = buildBuffer(buffer_size); // generate cyclicalc buffer of size "buffer_size" frames
-	load_file(); // invoke the load_file() function in order to fill generated buffer with frames from "input"
+	loadFile(); // invoke the load_file() function in order to fill generated buffer with frames from "input"
 
 	mainloop(); // start the main loop
 	

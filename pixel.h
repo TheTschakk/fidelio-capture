@@ -7,14 +7,6 @@ int getY(int index) {
     return index / WIDTH;
 }
 
-void substractFrames(struct image *img, struct image *ref) {
-    int i;
-    
-    for (i=0; i<LENGTH; i++){
-	img->diff[i] = (int) (img->data[i]) - (int) (ref->data[i]);
-    }
-}
-
 int inFrame(int index) {
     int x = getX(index);
     int y = getY(index);
@@ -26,13 +18,16 @@ int inFrame(int index) {
 
 void identifyPix(struct image *img, int lim) {
     int i;
+    int diff;
 
     for (i=0; i<LENGTH; i++) {
-	if ( (img->diff[i] > lim) && inFrame(i) ) {
+	diff = img->data[i] - img->prev->data[i];
+
+	if ( (diff > lim) && inFrame(i) ) {
 	    img->lght = addToList(img->lght, i, img->Nlght);
 	    img->Nlght++;
 	}
-	else if ( (img->diff[i] < -lim) && inFrame(i) ) {
+	else if ( (diff < -lim) && inFrame(i) ) {
 	    img->shdw = addToList(img->shdw, i, img->Nshdw);
 	    img->Nshdw++;
 	}

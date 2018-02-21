@@ -5,9 +5,8 @@
 
 struct image {
     int index;
+    //unsigned char data[LENGTH];
     unsigned char *data;
-    //int *diff;
-    int diff[LENGTH];
     int Nlght;
     int Nshdw;
     int *lght;
@@ -60,8 +59,7 @@ struct image *buildBuffer(int size){
 		img->adj = NULL;
 		img->num = 0;
 		img->met = NULL;
-		img->data = calloc(LENGTH, sizeof(unsigned char));
-		//img->diff = calloc(LENGTH, sizeof(int));
+		img->data = malloc(LENGTH * sizeof(unsigned char));
 
 		if(i == size){
 			img->next = start;
@@ -91,7 +89,6 @@ void freeBuffer(struct image *img) {
 
     do {
 	free(img->data);
-	//free(img->diff);
 	free(img->lght);
 	free(img->shdw);
 	if (img->adj != NULL) img->adj = free2dArray(img->adj, img->Nlght);
@@ -213,8 +210,10 @@ void getVelocity(struct graph *met0) {
     met0->dir = atan2(vx, vy);
 }
 
-int endOfMeteor(struct image *img, int depth) {
+int endOfMeteor(struct image *img, int *dur, int depth) {
     int i;
+    int num=-1;
+    *dur = 0;
 
     struct image *ref = img;
 
@@ -223,13 +222,13 @@ int endOfMeteor(struct image *img, int depth) {
     }
 
     for (i=0; i<(ref->num); i++) {
-       if ( (ref->met[i]->next == NULL) && (ref->met[i]->prev != NULL) ) {
-	   //printf("END\n");
-	   return i;
+       if ( (ref->met[i]->next == NULL) && (ref->met[i]->prev != NULL) && (ref->met[i]->duration > *dur) ) {
+	   num = i;
+	   *dur = ref->met[num]->duration;
        }
     }
 
-    return -1;
+    return num;
 }
     
 int backTraceMeteor(struct graph *met0) {
@@ -265,7 +264,7 @@ void printImage(struct image *img) {
     */
 
     for (i=0; i<(img->num); i++) {
-	printf("meteor =%i= || postion: X = %.2f, Y = %.2f | velocity: vx = %.3f, vy = %.3f, v2 = %.2f (R=%.4f) | continuity = %i\n", i, img->met[i]->posX, img->met[i]->posY, img->met[i]->vx, img->met[i]->vy, img->met[i]->v2, img->met[i]->R, img->met[i]->continuity);
+	printf("meteor =%i= || postion: X = %.2f, Y = %.2f | velocity: vx = %.3f, vy = %.3f, v2 = %.2f (R=%.4f) | continuity = %i | duration = %i\n", i, img->met[i]->posX, img->met[i]->posY, img->met[i]->vx, img->met[i]->vy, img->met[i]->v2, img->met[i]->R, img->met[i]->continuity, img->met[i]->duration);
 	/*
 	printf("LIGHT: ");
 	print1dArray(img->met[i]->lght, img->met[i]->Nlght);
