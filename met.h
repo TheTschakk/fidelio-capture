@@ -5,6 +5,7 @@
 
 struct image {
     int index;
+    struct timespec time;
     unsigned char *data;
     int Nlght;
     int Nshdw;
@@ -90,10 +91,7 @@ void freeBuffer(struct image *img) {
 	free(img->data);
 	free(img->lght);
 	free(img->shdw);
-        printf("i%i %p Nlght %i Nshdw %i\n", img->index, img->adj, img->Nlght, img->Nshdw);
-        //print2dArray(img->adj, img->Nlght, img->Nshdw);
 	if (img->adj != NULL) img->adj = free2dArray(img->adj, img->Nlght);
-	//if (img->Nlght > 0) img->adj = free2dArray(img->adj, img->Nlght);
 
 	for (i=0; i<(img->num); i++) {
 	    initMeteor(img->met[i]);

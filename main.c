@@ -18,7 +18,7 @@
 #define LENGTH 345600
 
 char *dev_name = "/dev/video1";
-char cam_id = 0;
+char cam_id = '0';
 const int buffer_size = 150;
 static int upfluff = 25;
 static int downfluff = 25;
@@ -49,75 +49,77 @@ int sum1dArray(int *list, int dim);
 #include "io.h"
 
 int mainloop (time_t exectime) {
-	int n=0;
-	int found=0;
-	int lifetime;
+    int n=0;
+    int found=0;
+    int lifetime;
 
-	time_t start = time(NULL);
-	time_t end = start + exectime;
-	
-	while (time(NULL) < end) {
-		printf("frame %i ################################################\n", frm->index);
-	    wait_for_frame();
+    time_t start = time(NULL);
+    time_t end = start + exectime;
 
-		analyseFrame(frm);
+    while (time(NULL) < end) {
+        printf("frame %i ################################################\n", frm->index);
+        wait_for_frame();
+        clock_gettime(CLOCK_REALTIME, &(frm->time));
 
-		if ( endOfMeteor(frm, &lifetime, 3) != -1 )
-		    found = lifetime;
+        if (found == 0)
+            analyseFrame(frm);
 
-		if (found > 0)
-		    n++;
-		else
-		    n = 0;
+        if ( endOfMeteor(frm, &lifetime, 3) != -1 )
+            found = lifetime;
 
-		if (n > upfluff) {
-		    write_video(frm, (downfluff + found + upfluff));
-		    n = 0;
-		    found = 0;
-		}
+        if (found > 0)
+            n++;
+        else
+            n = 0;
 
-		printImage(frm);
+        if (n > upfluff) {
+            write_video(frm, (downfluff + found + upfluff));
+            n = 0;
+            found = 0;
+        }
 
-		frm = frm->next;
-	}
-	return 0;
+        printImage(frm);
+
+        frm = frm->next;
+    }
+    return 0;
 }
 
 
 int main(int argc, char* argv[]) {
-	int time_int;
-	time_t time;
+    int time_int;
+    time_t time;
 
-	sscanf(argv[1], "%i", &time_int);
-	time = time_int;
+    sscanf(argv[1], "%i", &time_int);
+    time = time_int;
 
-	frm = buildBuffer(buffer_size);
+    frm = buildBuffer(buffer_size);
 
-	fd = open(dev_name, O_RDWR | O_NONBLOCK, 0);
-	
-	if (fd == -1) {
-		perror("Opening video device");
-		return 1;
-	}
+    fd = open(dev_name, O_RDWR | O_NONBLOCK, 0);
 
-	if(init_device(fd))
-		return 1;
+    if (fd == -1) {
+        perror("Opening video device");
+        return 1;
+    }
 
-	if(init_mmap(fd))
-		return 1;
+    if(init_device(fd))
+        return 1;
 
-	if (start_grabbing())
-		return 1;
+    if(init_mmap(fd))
+        return 1;
 
-	mainloop(time);
+    if (start_grabbing())
+        return 1;
 
-	stop_grabbing();
+    mainloop(time);
 
-	uninit_device();
+    stop_grabbing();
 
-	close(fd);
+    uninit_device();
 
-	freeBuffer(frm);
-	
-	return 0;
+    close(fd);
+
+    freeBuffer(frm);
+
+    return 0;
 }
