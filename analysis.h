@@ -1,11 +1,10 @@
 
 #include "test.h"
 
-clock_t t0;
-
 static int limit = 50;
 static int cutoff = 10;
 static int cdepth = 3;
+static int nlimit = 100;
 
 int left = 10;
 int right = 710;
@@ -29,18 +28,27 @@ int analyseMeteors(struct image *img) {
 }
 
 int analyseFrame(struct image *img) {
-    t0 = clock();
+    clock_t t0 = clock();
 
     initFrame(img);
-    	//printf("clock %ld\n", clock() - t0);
+
     identifyPix(img, limit); // build lists of bright (>0) and dark (<0) pixels from sub
-    	//printf("clock %ld\n", clock() - t0);
-    if ( buildAdj(img, cutoff) == 1) return 1; // build adjacency matrix between bright (>0) and dark (<0) pixels
-    	//printf("clock %ld\n", clock() - t0);
+    	printf("identifyPix "); printf("clock %ld\n", clock() - t0);
+
+    if ( (img->Nlght + img->Nshdw) > nlimit) {
+        printf("skipping frame because number of pixels exceeds maximal allowed (%i): %i\n", nlimit, img->Nlght + img->Nshdw);
+        return 1;
+    }
+
+    if ( buildAdj(img, cutoff) == 1 ) return 1; // build adjacency matrix between bright (>0) and dark (<0) pixels
+    	printf("buildAdj "); printf("clock %ld\n", clock() - t0);
+
     cluster(img); // sort vv-matrix to VV-matrix
-    	//printf("clock %ld\n", clock() - t0);
+    	printf("cluster "); printf("clock %ld\n", clock() - t0);
+
     analyseMeteors(img);
-    	//printf("clock %ld\n", clock() - t0);
+    	printf("analyseMeteors "); printf("clock %ld\n", clock() - t0);
+
     return 0;
 }
 

@@ -120,13 +120,12 @@ int start_grabbing(void) {
 }
 
 int process_frame(unsigned char *yuyv) {
-	unsigned int i;
+	int i;
 
-	for (i = 0; i < LENGTH; i++) {
+	for (i=0; i<LENGTH; i++) {
 		frm->data[i] = yuyv[2*i];
+		//printf("%u ", yuyv[2*i]);
 	}
-
-	frm = frm->next;
 }	
 
 int read_frame(void) {
@@ -158,6 +157,25 @@ int read_frame(void) {
 		return 1;
 	}
 	return 1;
+}
+
+void wait_for_frame(void) {
+    while (1) {	
+	fd_set fds;
+	FD_ZERO(&fds);
+	FD_SET(fd, &fds);
+	struct timeval tv = {0};
+	tv.tv_sec = 2;
+	tv.tv_usec = 0;
+
+	int r = select(fd+1, &fds, NULL, NULL, &tv);
+		
+	if (-1 == r)
+	    perror("Waiting for Frame");
+	
+	if (read_frame())
+	    break;
+    }
 }
 
 int stop_grabbing(void) {

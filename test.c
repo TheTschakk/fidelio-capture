@@ -1,6 +1,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <time.h>
 
@@ -50,9 +51,10 @@ int mainloop(void) {
 		    n = 0;
 
 		if (n > upfluff) {
-		    write_video(frm, (downfluff + found + upfluff));
+		    //write_video(frm, (downfluff + found + upfluff));
 		    n = 0;
 		    found = 0;
+		    sleep(5);
 		}
 
 		printf("frame %i ################################################\n", frm->index);

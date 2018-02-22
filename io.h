@@ -17,7 +17,15 @@ int read_video(char *input) {
 
 int write_video(struct image *last, int nfrms) {
 	int i;
-	FILE *outfd = fopen("positiv.bwv", "a"); // open file in append mode
+	char name[50];
+    char timestamp[20];
+    struct timespec systime;
+
+    clock_gettime(CLOCK_REALTIME, &systime);
+    strftime(timestamp, 100, "%Y%m%d_%H%M%S", gmtime(&(systime.tv_sec)));
+    sprintf(name, "video%c_%s_%i",cam_id, timestamp, systime.tv_nsec / 1000000);
+	
+	FILE *outfd = fopen(name, "a"); // open file in append mode
 
 	// go back nfrms frames from last frame to first frame
 	for (i=0; i<nfrms; i++) {

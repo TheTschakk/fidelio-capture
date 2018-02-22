@@ -5,7 +5,6 @@
 
 struct image {
     int index;
-    //unsigned char data[LENGTH];
     unsigned char *data;
     int Nlght;
     int Nshdw;
@@ -59,7 +58,7 @@ struct image *buildBuffer(int size){
 		img->adj = NULL;
 		img->num = 0;
 		img->met = NULL;
-		img->data = malloc(LENGTH * sizeof(unsigned char));
+		img->data = calloc(LENGTH, sizeof(unsigned char));
 
 		if(i == size){
 			img->next = start;
@@ -91,7 +90,10 @@ void freeBuffer(struct image *img) {
 	free(img->data);
 	free(img->lght);
 	free(img->shdw);
+        printf("i%i %p Nlght %i Nshdw %i\n", img->index, img->adj, img->Nlght, img->Nshdw);
+        //print2dArray(img->adj, img->Nlght, img->Nshdw);
 	if (img->adj != NULL) img->adj = free2dArray(img->adj, img->Nlght);
+	//if (img->Nlght > 0) img->adj = free2dArray(img->adj, img->Nlght);
 
 	for (i=0; i<(img->num); i++) {
 	    initMeteor(img->met[i]);
@@ -130,9 +132,12 @@ void initFrame(struct image *img) {
     img->lght = NULL;
     free(img->shdw);
     img->shdw = NULL;
+    
+    if (img->adj != NULL) img->adj = free2dArray(img->adj, img->Nlght);
 
     for (i=0; i<(img->num); i++) {
 	initMeteor(img->met[i]);
+        free(img->met[i]);
     }
 
     free(img->met);
@@ -265,11 +270,11 @@ void printImage(struct image *img) {
 
     for (i=0; i<(img->num); i++) {
 	printf("meteor =%i= || postion: X = %.2f, Y = %.2f | velocity: vx = %.3f, vy = %.3f, v2 = %.2f (R=%.4f) | continuity = %i | duration = %i\n", i, img->met[i]->posX, img->met[i]->posY, img->met[i]->vx, img->met[i]->vy, img->met[i]->v2, img->met[i]->R, img->met[i]->continuity, img->met[i]->duration);
-	/*
 	printf("LIGHT: ");
 	print1dArray(img->met[i]->lght, img->met[i]->Nlght);
 	printf("SHADOW: ");
 	print1dArray(img->met[i]->shdw, img->met[i]->Nshdw);
+	/*
 	printf("\n");
 	print1dArray(img->met[i]->x, img->met[i]->Nvtc);
 	print1dArray(img->met[i]->y, img->met[i]->Nvtc);

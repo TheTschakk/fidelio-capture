@@ -16,7 +16,7 @@ int inFrame(int index) {
     return 0;
 }
 
-void identifyPix(struct image *img, int lim) {
+int identifyPix(struct image *img, int lim) {
     int i;
     int diff;
 
@@ -32,6 +32,7 @@ void identifyPix(struct image *img, int lim) {
 	    img->Nshdw++;
 	}
     }
+    return (img->Nlght + img->Nshdw);
 }
 
 int squareDist(int i1, int i2) {

@@ -17,9 +17,9 @@
 #define WIDTH 720
 #define LENGTH 345600
 
-const char *dev_name = "/dev/video0";
+char *dev_name = "/dev/video1";
+char cam_id = 0;
 const int buffer_size = 150;
-const int n_elapsed = 50;
 static int upfluff = 25;
 static int downfluff = 25;
 
@@ -57,24 +57,8 @@ int mainloop (time_t exectime) {
 	time_t end = start + exectime;
 	
 	while (time(NULL) < end) {
-		while (1) {	
-			fd_set fds;
-			FD_ZERO(&fds);
-			FD_SET(fd, &fds);
-			struct timeval tv = {0};
-			tv.tv_sec = 2;
-			tv.tv_usec = 0;
-
-			int r = select(fd+1, &fds, NULL, NULL, &tv);
-		
-			if (-1 == r) {
-				perror("Waiting for Frame");
-				return 1;
-			}
-
-			if (read_frame())
-				break;
-		}
+		printf("frame %i ################################################\n", frm->index);
+	    wait_for_frame();
 
 		analyseFrame(frm);
 
@@ -92,9 +76,9 @@ int mainloop (time_t exectime) {
 		    found = 0;
 		}
 
-		printf("frame %i ################################################\n", frm->index);
 		printImage(frm);
 
+		frm = frm->next;
 	}
 	return 0;
 }
