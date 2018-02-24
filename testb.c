@@ -7,8 +7,12 @@
 
 #define HEIGHT 480
 #define WIDTH 720
-#define LENGTH 345600
-int nlimit = 1024*32;
+#define LENGTH HEIGHT*WIDTH
+
+#define INT 32
+#define MAXPIX 1024*32
+#define SIZE MAXPIX/INT
+#define MAXMET 10
 
 static char *input;
 char cam_id = '0';
@@ -18,21 +22,11 @@ static int downfluff = 25;
 
 static struct image *frm = NULL;
 
-int *initList(int *list);
-int *addToList(int *list, int item, int size);
-int *rmFromList(int *list, int item, int cols);
 void switchEle(int *list, int item1, int item2);
-int **alloc2dArray(int **arr, int rows, int cols);
-int **free2dArray(int **arr, int rows);
-int **rmRow(int **arr, int row0, int *rows);
-int **rmCol(int **arr, int col0, int rows, int *cols);
-void switchRows(int **arr, int row1, int row2, int cols);
-void switchCols(int **arr, int col1, int col2, int rows);
 void print1dArray(int *list, int dim);
-void print2dArray(int **arr, int rows, int cols);
 
-#include "met.h"
-#include "analysis.h"
+#include "metb.h"
+#include "analysisb.h"
 #include "io.h"
 
 // main loop works similar to actual 
@@ -47,7 +41,7 @@ int mainloop(void) {
                 /*
 		if ( endOfMeteor(frm, &lifetime, 3) != -1 )
 		    found = lifetime;
-                    */
+                */
 
 		if (found > 0)
 		    n++;
@@ -62,7 +56,7 @@ int mainloop(void) {
 		}
 
 		printf("frame %i ################################################\n", frm->index);
-		printImage(frm);
+		//printImage(frm);
 
 		frm = frm->next;
 

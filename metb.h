@@ -9,9 +9,10 @@ struct image {
     unsigned char *data;
     int Nlght;
     int Nshdw;
-    int *lght;
-    int *shdw;
-    int **adj;
+    unsigned int *lght;
+    unsigned int *shdw;
+    unsigned int *adjL;
+    unsigned int *adjS;
     int num;
     struct meteor **met;
     struct image *prev;
@@ -39,27 +40,47 @@ struct meteor {
     struct meteor *next;
 };
 
+void addMeteor(struct meteor *met) {
+    met->lght = calloc(MAXPIX, sizeof(int));
+    met->shdw = calloc(MAXPIX, sizeof(int));
+    met->vtc = calloc(2*MAXPIX, sizeof(int));
+    met->Nlght = 0;
+    met->Nshdw = 0;
+    met->Nvtc = 0;
+    met->prev = NULL;
+    met->next = NULL;
+    met->continuity = 0;
+    met->duration = 0;
+}
+    
 struct image *buildBuffer(int size){
 
-	int i;
+	int i,j;
 
 	struct image *start = malloc(sizeof(struct image));
 	struct image *tmp = NULL;
 	
 	struct image *img = start;
 
-	for (i = 1; i <= size; i++) {
+	for (i=1; i<=size; i++) {
 
 		img->prev = tmp;
 		img->index = i;
 		img->Nlght = 0;
 		img->Nshdw = 0;
-		img->lght = NULL;
-		img->shdw = NULL;
-		img->adj = NULL;
 		img->num = 0;
-		img->met = NULL;
 		img->data = calloc(LENGTH, sizeof(unsigned char));
+                img->lght = calloc(MAXPIX, sizeof(unsigned int));
+                img->shdw = calloc(MAXPIX, sizeof(unsigned int));
+                img->adjL = calloc(SIZE*SIZE, sizeof(unsigned int));
+                img->adjS = calloc(SIZE*SIZE, sizeof(unsigned int));
+
+                img->met = calloc(MAXMET, sizeof(struct meteor *));
+
+                for (j=0; j<MAXMET; j++) {
+                    img->met[j] = malloc(sizeof(struct meteor));
+                    addMeteor(img->met[j]);
+                }
 
 		if(i == size){
 			img->next = start;
@@ -76,6 +97,17 @@ struct image *buildBuffer(int size){
 }
 
 void initMeteor(struct meteor *met) {
+    met->Nlght = 0;
+    met->Nshdw = 0;
+    met->Nvtc = 0;
+
+    met->prev = NULL;
+    met->next = NULL;
+    met->continuity = 0;
+    met->duration = 0;
+}
+
+void freeMeteor(struct meteor *met) {
     free(met->lght);
     free(met->shdw);
     free(met->vtc);
@@ -91,10 +123,11 @@ void freeBuffer(struct image *img) {
 	free(img->data);
 	free(img->lght);
 	free(img->shdw);
-	if (img->adj != NULL) img->adj = free2dArray(img->adj, img->Nlght);
+        free(img->adjL);
+        free(img->adjS);
 
-	for (i=0; i<(img->num); i++) {
-	    initMeteor(img->met[i]);
+	for (i=0; i<MAXMET; i++) {
+	    freeMeteor(img->met[i]);
 	    free(img->met[i]);
 	}
 
@@ -107,39 +140,17 @@ void freeBuffer(struct image *img) {
     } while (img != NULL);
 }
 
-void addMeteor(struct image *img) {
-    int N = img->num;
-    img->met = realloc(img->met, (N+1) * sizeof(struct meteor *));
-    img->met[N] = malloc(sizeof(struct meteor));
-    img->met[N]->lght = malloc(sizeof(int));
-    img->met[N]->shdw = malloc(sizeof(int));
-    img->met[N]->vtc = NULL;
-    img->met[N]->Nlght = 1;
-    img->met[N]->Nshdw = 1;
-    img->met[N]->Nvtc = 2;
-    img->met[N]->prev = NULL;
-    img->met[N]->next = NULL;
-    img->met[N]->continuity = 0;
-    img->met[N]->duration = 0;
-}
-    
 void initFrame(struct image *img) {
     int i;
 
-    free(img->lght);
-    img->lght = NULL;
-    free(img->shdw);
-    img->shdw = NULL;
-    
-    if (img->adj != NULL) img->adj = free2dArray(img->adj, img->Nlght);
-
-    for (i=0; i<(img->num); i++) {
-	initMeteor(img->met[i]);
-        free(img->met[i]);
+    for (i=0; i<=( (img->Nlght / INT + (img->Nlght % INT != 0)) * (img->Nshdw / INT + (img->Nshdw % INT != 0)) ); i++) {
+       img->adjL[i] = 0; 
+       img->adjS[i] = 0;
     }
 
-    free(img->met);
-    img->met = NULL;
+    for (i=0; i<MAXMET; i++) {
+	initMeteor(img->met[i]);
+    }
 
     img->Nlght = 0;
     img->Nshdw = 0;
@@ -260,15 +271,10 @@ int backTraceMeteor(struct meteor *met0) {
 
 void printImage(struct image *img) {
     int i;
-    printf("\n");
-    /*
-    print2dArray(img->adj, img->Nlght, img->Nshdw);
-    printf("\n");
-    */
 
     for (i=0; i<(img->num); i++) {
 	printf("meteor =%i= || postion: X = %.2f, Y = %.2f | velocity: vx = %.3f, vy = %.3f, v2 = %.2f (R=%.4f) | continuity = %i | duration = %i\n", i, img->met[i]->posX, img->met[i]->posY, img->met[i]->vx, img->met[i]->vy, img->met[i]->v2, img->met[i]->R, img->met[i]->continuity, img->met[i]->duration);
-	/*
+        /*
 	printf("LIGHT: ");
 	print1dArray(img->met[i]->lght, img->met[i]->Nlght);
 	printf("SHADOW: ");
@@ -276,10 +282,9 @@ void printImage(struct image *img) {
 	printf("\n");
 	print1dArray(img->met[i]->x, img->met[i]->Nvtc);
 	print1dArray(img->met[i]->y, img->met[i]->Nvtc);
-	print2dArray(img->met[i]->weights, img->met[i]->Nvtc, img->met[i]->Nvtc);
-	*/
+        */
 	//if (img->met[i]->deg != NULL) print1dArray(img->met[i]->deg, img->met[i]->Nvtc);
 	printf("\n");
     }
 }
-	
+
