@@ -260,8 +260,8 @@ int backTraceMeteor(struct meteor *met0) {
 
 void printImage(struct image *img) {
     int i;
-    printf("\n");
     /*
+    printf("\n");
     print2dArray(img->adj, img->Nlght, img->Nshdw);
     printf("\n");
     */
@@ -276,9 +276,7 @@ void printImage(struct image *img) {
 	printf("\n");
 	print1dArray(img->met[i]->x, img->met[i]->Nvtc);
 	print1dArray(img->met[i]->y, img->met[i]->Nvtc);
-	print2dArray(img->met[i]->weights, img->met[i]->Nvtc, img->met[i]->Nvtc);
 	*/
-	//if (img->met[i]->deg != NULL) print1dArray(img->met[i]->deg, img->met[i]->Nvtc);
 	printf("\n");
     }
 }

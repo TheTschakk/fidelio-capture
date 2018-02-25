@@ -42,6 +42,7 @@ int mainloop(void) {
 	int lifetime;
 
 	while (1) {
+		printf("frame %i ################################################\n", frm->index);
 		analyseFrame(frm);
 
                 /*
@@ -61,7 +62,6 @@ int mainloop(void) {
 		    sleep(5);
 		}
 
-		printf("frame %i ################################################\n", frm->index);
 		printImage(frm);
 
 		frm = frm->next;

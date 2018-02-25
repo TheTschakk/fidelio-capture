@@ -2,7 +2,7 @@
 #include "test.h"
 
 static int limit = 50;
-static int cutoff = 10;
+static int cutoff = 4;
 static int cdepth = 3;
 
 int left = 10;

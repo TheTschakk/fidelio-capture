@@ -9,8 +9,8 @@ struct image {
     unsigned char *data;
     int Nlght;
     int Nshdw;
-    unsigned int *lght;
-    unsigned int *shdw;
+    int *lght;
+    int *shdw;
     unsigned int *adjL;
     unsigned int *adjS;
     int num;
@@ -70,10 +70,10 @@ struct image *buildBuffer(int size){
 		img->Nshdw = 0;
 		img->num = 0;
 		img->data = calloc(LENGTH, sizeof(unsigned char));
-                img->lght = calloc(MAXPIX, sizeof(unsigned int));
-                img->shdw = calloc(MAXPIX, sizeof(unsigned int));
-                img->adjL = calloc(SIZE*SIZE, sizeof(unsigned int));
-                img->adjS = calloc(SIZE*SIZE, sizeof(unsigned int));
+                img->lght = calloc(MAXPIX, sizeof(int));
+                img->shdw = calloc(MAXPIX, sizeof(int));
+                img->adjL = calloc(MAXPIX*MAXPIX/INT, sizeof(unsigned int));
+                img->adjS = calloc(MAXPIX*MAXPIX/INT, sizeof(unsigned int));
 
                 img->met = calloc(MAXMET, sizeof(struct meteor *));
 
@@ -272,8 +272,10 @@ int backTraceMeteor(struct meteor *met0) {
 void printImage(struct image *img) {
     int i;
 
+    printf("Nlgth %i | Nshdw %i || Nmet %i \n\n", img->Nlght, img->Nshdw, img->num);
+
     for (i=0; i<(img->num); i++) {
-	printf("meteor =%i= || postion: X = %.2f, Y = %.2f | velocity: vx = %.3f, vy = %.3f, v2 = %.2f (R=%.4f) | continuity = %i | duration = %i\n", i, img->met[i]->posX, img->met[i]->posY, img->met[i]->vx, img->met[i]->vy, img->met[i]->v2, img->met[i]->R, img->met[i]->continuity, img->met[i]->duration);
+	printf("meteor =%i= || num = %i | postion: X = %.1f, Y = %.1f | velocity: vx = %.2f, vy = %.2f, v2 = %.1f (R=%.4f) | continuity = %i | duration = %i\n", i, img->met[i]->Nvtc, img->met[i]->posX, img->met[i]->posY, img->met[i]->vx, img->met[i]->vy, img->met[i]->v2, img->met[i]->R, img->met[i]->continuity, img->met[i]->duration);
         /*
 	printf("LIGHT: ");
 	print1dArray(img->met[i]->lght, img->met[i]->Nlght);

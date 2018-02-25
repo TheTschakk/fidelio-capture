@@ -35,43 +35,35 @@ int analyseFrame(struct image *img) {
 
     initFrame(img);
 
-    identifyPix(img, limit); // build lists of bright (>0) and dark (<0) pixels from sub
+    if ( identifyPix(img, limit) ) return 1; // build lists of bright (>0) and dark (<0) pixels from sub
     
-    blockL = img->Nlght / INT + (img->Nlght % INT != 0);
-    blockS = img->Nshdw / INT + (img->Nshdw % INT != 0);
+    clock_gettime(CLOCK_REALTIME, &systime); printf("identifyPix %f sec\n", (float) ((systime.tv_nsec - reftime.tv_nsec)/1000) / 1000000);
 
-    //printf("nl%i ns%i\n", img->Nlght, img->Nshdw);
-    //printf("bl%i bs%i\n", blockL, blockS);
-
-    clock_gettime(CLOCK_REALTIME, &systime);
-    printf("identifyPix %f sec\n", (float) ((systime.tv_nsec - reftime.tv_nsec)/1000) / 1000000);
-
-    if ( (img->Nlght + img->Nshdw) > MAXPIX) {
-        printf("exceeding MAXPIX (%i): %i\n", MAXPIX, img->Nlght + img->Nshdw);
-        return 1;
-    } else if ( !(img->Nlght && img->Nshdw) ) {
-        printf("Nlght or Nshdw == 0\n");
-        return 1;
-    }
+    blockL = img->Nshdw / INT + (img->Nshdw % INT != 0);
+    blockS = img->Nlght / INT + (img->Nlght % INT != 0);
 
     buildAdj(img, cutoff);
 
-    clock_gettime(CLOCK_REALTIME, &systime);
-    printf("buildAdj %f sec\n", (float) ((systime.tv_nsec - reftime.tv_nsec)/1000) / 1000000);
+    clock_gettime(CLOCK_REALTIME, &systime); printf("buildAdj %f sec\n", (float) ((systime.tv_nsec - reftime.tv_nsec)/1000) / 1000000);
 
+    //printf("nl %i ns %i\n", img->Nlght, img->Nshdw);
+    //print1dArray(img->lght, img->Nlght);
+    //print1dArray(img->shdw, img->Nshdw);
+
+    //print2dBitArray(img->adjL, img->Nlght, img->Nshdw);
+    //printf("\n");
+    //printf("bl %i bs %i\n", blockL, blockS);
+    //printf("%u %u %u\n", img->adjL[0], img->adjL[1], img->adjL[2]);
     cluster(img);
+    //print2dBitArray(img->adjL, img->Nlght, img->Nshdw);
 
-    //print1dArray(img->met[0]->lght, img->met[0]->Nlght);
-    //print1dArray(img->met[0]->shdw, img->met[0]->Nshdw);
-    //print1dArray(img->met[0]->vtc, img->met[0]->Nvtc);
-
-    clock_gettime(CLOCK_REALTIME, &systime);
-    printf("cluster %f sec\n", (float) ((systime.tv_nsec - reftime.tv_nsec)/1000) / 1000000);
+    clock_gettime(CLOCK_REALTIME, &systime); printf("cluster %f sec\n", (float) ((systime.tv_nsec - reftime.tv_nsec)/1000) / 1000000);
 
     analyseMeteors(img);
 
-    clock_gettime(CLOCK_REALTIME, &systime);
-    printf("analyseMeteor %f sec\n", (float) ((systime.tv_nsec - reftime.tv_nsec)/1000) / 1000000);
+    clock_gettime(CLOCK_REALTIME, &systime); printf("analyseMeteor %f sec\n", (float) ((systime.tv_nsec - reftime.tv_nsec)/1000) / 1000000);
+
+    printImage(img);
 
     return 0;
 }

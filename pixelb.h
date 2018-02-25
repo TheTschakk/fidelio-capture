@@ -24,15 +24,20 @@ int identifyPix(struct image *img, int lim) {
 	diff = img->data[i] - img->prev->data[i];
 
 	if ( (diff > lim) && inFrame(i) ) {
+            if ( img->Nlght == MAXPIX ) return -1;
 	    img->lght[img->Nlght] = i;
 	    img->Nlght++;
 	}
 	else if ( (diff < -lim) && inFrame(i) ) {
+            if ( img->Nshdw == MAXPIX ) return -1;
 	    img->shdw[img->Nshdw] = i;
 	    img->Nshdw++;
 	}
     }
-    return (img->Nlght + img->Nshdw);
+
+    if ( !(img->Nlght && img->Nshdw) ) return 1;
+
+    return 0;
 }
 
 int squareDist(int i1, int i2) {

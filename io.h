@@ -26,7 +26,7 @@ int write_video(struct image *last, int nfrms) {
     }
 
     strftime(timestamp, 100, "%Y%m%d_%H%M%S", gmtime(&(last->time.tv_sec)));
-    sprintf(name, "video%c_%s_%i.bwv",cam_id, timestamp, last->time.tv_nsec / 1000000);
+    sprintf(name, "video%c_%s_%03ld.bwv",cam_id, timestamp, last->time.tv_nsec / 1000000);
 
     FILE *outfd = fopen(name, "a"); // open file in append mode
 

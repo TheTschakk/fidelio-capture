@@ -20,7 +20,7 @@ int getBit(unsigned int *A, int k) {
 }
 
 void printBits(unsigned int *A, int start, int length) {
-    int i, j;
+    int i;
 
     for (i=0; i<length; i++) {
         printf("%i ", getBit(A, start+i));
@@ -28,6 +28,3 @@ void printBits(unsigned int *A, int start, int length) {
     printf("\n");
 }
 
-int compareRows(unsigned *arr, int rows, int cols) {
-    
-}
