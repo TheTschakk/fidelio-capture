@@ -17,7 +17,6 @@ void cluster(struct image *img) {
     int l=0, s=0;
     int nl=0, ns=0;
     int fl=1, fs=1;
-    unsigned int zeroL, zeroR;
     int zero;
 
     img->num = -1;
@@ -61,10 +60,9 @@ void cluster(struct image *img) {
         }
         if (nl > l) {
             for (i=nl; i<(img->Nlght); i++) {
-                zeroL = 0, zeroR = 0;
                 for (j=0; j<blockL; j++) {
-                    if ( (zeroL |= img->adjL[l*blockL + j]) & (/*zeroR |=*/ img->adjL[i*blockL + j]) ) {
-                        switchRow(img->adjL, nl, i, blockL); // if nl = i
+                    if ( img->adjL[l*blockL + j] & img->adjL[i*blockL + j] ) {
+                        switchRow(img->adjL, nl, i, blockL);
                         switchEle(img->lght, nl, i);
                         img->met[img->num]->lght[img->met[img->num]->Nlght] = img->lght[nl];
                         img->met[img->num]->Nlght++;
@@ -74,23 +72,13 @@ void cluster(struct image *img) {
                         break;
                     }
                 }
-                if (!zeroL) {
-                    printf("ZEROOOOOOOO\n");
-                    nl++;
-                    break;
-                } /*else if (!zeroR) {
-                    switchRow(img->adjL, nl, i, blockL);
-                    switchEle(img->lght, nl, i);
-                    nl++;
-                }*/
             }
             l++;
         }
         else if (ns > s) {
             for (i=ns; i<(img->Nshdw); i++) {
-                zeroL = 0, zeroR = 0;
                 for (j=0; j<blockS; j++) {
-                    if ( (zeroL |= img->adjS[s*blockS + j]) & (/*zeroR |=*/ img->adjS[i*blockS + j]) ) {
+                    if ( img->adjS[s*blockS + j] & img->adjS[i*blockS + j] ) {
                         switchRow(img->adjS, ns, i, blockS);
                         switchEle(img->shdw, ns, i);
                         img->met[img->num]->shdw[img->met[img->num]->Nshdw] = img->shdw[ns];
@@ -101,16 +89,6 @@ void cluster(struct image *img) {
                         break;
                     }
                 }
-                if (!zeroL) {
-                    printf("ZEROOOOOOOO\n");
-                    ns++;
-                    break;
-                    
-                } /*else if (!zeroR) {
-                    switchRow(img->adjS, ns, i, blockS);
-                    switchEle(img->shdw, ns, i);
-                    ns++;
-                }*/
             }
             s++;
         }
