@@ -25,10 +25,11 @@ void cluster(struct image *img) {
         if ( (nl == l) && (ns == s) ) {
             for (i=l; i<(img->Nlght); i++) {
                 for (j=0; j<blockL; j++) {
-                    if ( zeroL = img->adjL[i*blockL + j] ) {
+                    if ( (zeroL = img->adjL[i*blockL + j]) ) {
                         break;
                     }
                 }
+                printf("zeroL %i\n", zeroL);
                 if (zeroL) {
                     break;
                 } else {
@@ -42,7 +43,7 @@ void cluster(struct image *img) {
 
             for (i=s; i<(img->Nshdw); i++) {
                 for (j=0; j<blockS; j++) {
-                    if ( zeroS = img->adjS[i*blockS + j] ) {
+                    if ( (zeroS = img->adjS[i*blockS + j]) ) {
                         break;
                     }
                 }
@@ -101,6 +102,7 @@ void cluster(struct image *img) {
                     }
                 }
                 if (zero) {
+                    //printf("Z ");
                     switchRow(img->adjS, ns, i, blockS);
                     switchEle(img->shdw, ns, i);
                     ns++;
